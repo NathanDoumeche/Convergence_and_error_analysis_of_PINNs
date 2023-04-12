@@ -1,0 +1,6 @@
+Bien séparer les points de contraintes des points de données (pour l'instant on a pris Xi = Xri)
+
+Tuning de lambda_t et lambda_d (prendre lambdat de la forme n puissance -epsilon, car la constante avant obtention du taux minimax rique d'être salée)
+
+Si la loss descend trop vite, diminuer le learning rate
+Vérifier l'overfitting gap (attention au risque qu'on regarde et à l'ordre des limites)
