@@ -38,7 +38,7 @@ def sobolev_regularization(model, n_r, pred):
 
 
 def advection_constraint(model, n_r):
-    return mean_squared(model.gradientR[0:n_r,0]-model.gradientR[0:n_r,1])
+    return mean_squared(model.gradientR[0:n_r,0]+model.gradientR[0:n_r,1])
 
 
 def boundary_initial_conditions(pred, n_r, n_e, h):
@@ -55,7 +55,7 @@ def lossGrad(model, x_r, x_e, h, x, y):
 def train(train_loader_r, train_loader_e, train_loader_data, val_loader, model, loss_fn, optimizer, lambda_t, lambda_d):
     batch_number = len(train_loader_r)
     model.train()
-    loss_trainAcc = []
+    loss_train_Tot = []
 
     train_r = iter(train_loader_r)
     train_e = iter(train_loader_e)
@@ -73,29 +73,34 @@ def train(train_loader_r, train_loader_e, train_loader_data, val_loader, model, 
         lossTot.backward(retain_graph=True)
         optimizer.step()
 
-        loss_trainAcc.append(loss[0].item())
-    loss_mean_train = np.mean(np.array(loss_trainAcc))
+        loss_train_Tot.append(lossTot.item())
+    loss_mean_train = np.mean(np.array(loss_train_Tot))
 
     model.eval()
     lossValAcc = []
+    loss_val_tot = []
     for batch, X in enumerate(val_loader):
         x = X[:,0:2].reshape(-1,2)
         y = X[:,2].reshape(-1,1)
         # Compute prediction error
-        pred = model(x)
-        lossValAcc = nn.functional.mse_loss(pred, y).item()
+        loss = loss_fn(model, x_r, x_e, h, x, y)
+        loss_val_tot.append((lambda_d * loss[0] + loss[1] + loss[2] + lambda_t * loss[3]).item())
+        lossValAcc.append(loss[0].item())
     loss_mean_val = np.mean(np.array(lossValAcc))
-    return loss_mean_train, loss_mean_val
+    overfitting_gap = np.mean(np.array(loss_train_Tot)) - np.mean(np.array(loss_val_tot))
+    return loss_mean_train, loss_mean_val, overfitting_gap
 
 
 def simulation(n, n_e, n_r, n_val):
     # Hyperparameters
-    epochs, batch_number, lr = 50, 10, 10**(-4)
+    epochs, batch_number, lr = 1000, 1, 10**(-3)
 
     # PINNs hyperparameter
-    weight_decay = n_r**(-1/2)
-    lambda_t = 0.1*(np.log(n))**(-1)
-    lambda_d = (n**(1/2)) * lambda_t * 10
+    weight_decay = n_r**(-1)
+    #lambda_t = 0.1*(np.log(1+n))**(-1)
+    #lambda_d = (n**(1/2)) * lambda_t * 10
+    lambda_t = n**(-1/4)
+    lambda_d = n**(1/2)
 
     #Model
     noise = 0.1
@@ -113,12 +118,12 @@ def simulation(n, n_e, n_r, n_val):
     train_Xe = torch.cat((initial_conditions, boundary_conditions))
 
     train_X = torch.rand(n, 2)
-    train_y = (torch.exp(train_X[:,0]-train_X[:,1])).reshape(-1,1) + noise*torch.rand(n,1)
+    train_y = (torch.exp(train_X[:,0]-train_X[:,1])+ 0.1*torch.cos(train_X[:,1])).reshape(-1,1) + noise*torch.rand(n,1)
     train_data = torch.cat((train_X, train_y), dim=1)
 
     #Validation dataset: 0 < t,x < 1
     val_x = torch.rand(n_val, 2)
-    val_y = (torch.exp(val_x[:,0]-val_x[:,1])).reshape(-1,1)
+    val_y = (torch.exp(val_x[:,0]-val_x[:,1])+ 0.1*torch.cos(val_x[:,1])).reshape(-1,1)
     val_dataset = torch.cat((val_x, val_y), dim=1)
 
     # Create data loaders
@@ -133,16 +138,19 @@ def simulation(n, n_e, n_r, n_val):
 
     train_loss = []
     val_loss = []
+    overfitting_gap_list = []
     for t in range(epochs):
         print(f"Epoch {t+1}")
-        loss_train, loss_val = train(train_loader_r, train_loader_e, train_loader_data, val_loader,
+        loss_train, loss_val, overfitting_gap = train(train_loader_r, train_loader_e, train_loader_data, val_loader,
                                      model, loss_fn, optimizer, lambda_t, lambda_d)
         train_loss.append(loss_train)
         val_loss.append(loss_val)
+        overfitting_gap_list.append(overfitting_gap)
 
     plt.figure()
-    plt.plot(np.log(np.array(train_loss)), label="ln(train loss)")
-    plt.plot(np.log(np.array(val_loss)), label="ln(val loss)")
+    plt.plot(np.log(np.array(train_loss)), label="ln(train total loss)")
+    plt.plot(np.log(np.array(val_loss)), label="ln(val L2 loss)")
+    plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|overfitting gap|)")
     plt.legend()
     plt.xlabel("Epochs")
     plt.savefig(os.path.join("Outputs_PINNs_2d", "perf_"+str(n)+".pdf"), bbox_inches="tight")
@@ -152,8 +160,8 @@ def simulation(n, n_e, n_r, n_val):
 
 if __name__ == "__main__":
     list_n, val_loss=[], []
-    for order_of_magnitude in np.arange(1, 5, 0.5):
-        n, n_e, n_val = int(10**order_of_magnitude), 10**5, 10**5
+    for order_of_magnitude in np.arange(1, 4, 0.5):
+        n, n_e, n_val = int(10**order_of_magnitude), 10**4, 10**4
         n_r = n_e
 
         print("Training model for n = "+str(n))
