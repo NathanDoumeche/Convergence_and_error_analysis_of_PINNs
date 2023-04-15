@@ -63,7 +63,7 @@ def train(train_loader_r, train_loader_e, train_loader_data, val_loader, model, 
 
     for batch in range(batch_number):
         x_r, XeH, XY = next(train_r), next(train_e), next(train_XY)
-        x_e, h = XY[:,0:2].reshape(-1,2), XY[:,2].reshape(-1,1)
+        x_e, h = XeH[:,0:2].reshape(-1,2), XeH[:,2].reshape(-1,1)
         x, y = XY[:,0:2].reshape(-1,2), XY[:,2].reshape(-1,1)
 
         # Backpropagation
@@ -96,10 +96,10 @@ def simulation(n, n_e, n_r, n_val):
     epochs, batch_number, lr = 1000, 1, 10**(-3)
 
     # PINNs hyperparameter
-    weight_decay = n_r**(-1)
+    weight_decay = n_r**(-2)
     #lambda_t = 0.1*(np.log(1+n))**(-1)
     #lambda_d = (n**(1/2)) * lambda_t * 10
-    lambda_t = n**(-1/4)
+    lambda_t = 0.1/np.log(n)
     lambda_d = n**(1/2)
 
     #Model
@@ -118,7 +118,7 @@ def simulation(n, n_e, n_r, n_val):
     train_Xe = torch.cat((initial_conditions, boundary_conditions))
 
     train_X = torch.rand(n, 2)
-    train_y = (torch.exp(train_X[:,0]-train_X[:,1])+ 0.1*torch.cos(train_X[:,1])).reshape(-1,1) + noise*torch.rand(n,1)
+    train_y = (torch.exp(train_X[:,0]-train_X[:,1])+ 0.1*torch.cos(train_X[:,1])).reshape(-1,1) + noise*torch.normal(mean = torch.zeros(n)).reshape(-1,1)
     train_data = torch.cat((train_X, train_y), dim=1)
 
     #Validation dataset: 0 < t,x < 1
@@ -153,18 +153,18 @@ def simulation(n, n_e, n_r, n_val):
     plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|overfitting gap|)")
     plt.legend()
     plt.xlabel("Epochs")
-    plt.savefig(os.path.join("Outputs_PINNs_2d", "perf_"+str(n)+".pdf"), bbox_inches="tight")
+    plt.savefig(os.path.join("Outputs_PINNs", "perf_"+str(n)+".pdf"), bbox_inches="tight")
 
     return np.log(np.array(val_loss))[-1]
 
 
 if __name__ == "__main__":
     list_n, val_loss=[], []
-    for order_of_magnitude in np.arange(1, 4, 0.5):
-        n, n_e, n_val = int(10**order_of_magnitude), 10**4, 10**4
+    for order_of_magnitude in np.arange(1, 3+1/4, 1/4):
+        n, n_e, n_val = int(10**order_of_magnitude), 10**4, 10**2
         n_r = n_e
 
         print("Training model for n = "+str(n))
         val_loss.append(simulation(n, n_e, n_r, n_val))
         list_n.append(np.log(n))
-    pd.DataFrame({"log(n)": list_n, "log(Validation_loss)": val_loss}).to_csv(os.path.join("Outputs_PINNs_2d", "validation_loss.csv"))
+    pd.DataFrame({"log(n)": list_n, "log(Validation_loss)": val_loss}).to_csv(os.path.join("Outputs_PINNs", "validation_loss.csv"))
