@@ -45,6 +45,9 @@ def sobolev_regularization(model, n_r, pred):
 def lossGrad(model, x_r, x_e, h, x, y):
     x_tot = torch.cat((x_r, x_e, x))
     pred = model(x_tot)
-    return nn.functional.mse_loss(pred[len(x_r) + len(x_e):], y), \
-        boundary_initial_conditions(pred, len(x_r), len(x_e), h), \
-        advection_constraint(model, len(x_r)), sobolev_regularization(model, len(x_r), pred)
+
+    data_loss = 0 if len(x) == 0 else nn.functional.mse_loss(pred[len(x_r) + len(x_e):], y)
+    conditions_loss = 0 if len(x_e) == 0 else boundary_initial_conditions(pred, len(x_r), len(x_e), h)
+    differential_loss = 0 if len(x_r) == 0 else advection_constraint(model, len(x_r))
+    sobolev_loss = 0 if len(x_r)==0 else sobolev_regularization(model, len(x_r), pred)
+    return data_loss, conditions_loss, differential_loss, sobolev_loss
