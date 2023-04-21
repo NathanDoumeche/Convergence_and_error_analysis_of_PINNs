@@ -19,8 +19,9 @@ def figure_monitoring(train_loss, test_loss, overfitting_gap_list, physics_incon
                                                  ", 10^"+base_10(n_r)+"}^{(\mathrm{reg})})$")
     plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|overfitting gap|)")
     plt.plot(np.log(np.array(physics_inconsistency)), label="ln(PI)")
-    plt.plot(np.log(np.array(test_loss)), label="$\ln(\int_\Omega \|u^\\star - u_{\\hat \\theta(p, 10^" + base_10(n_e) +
-                                                ", 10^" + base_10(n_r)+", 10^" + base_10(D) + ")}\|_2^2d\\mu_X)$")
+    plt.plot(np.log(np.array(test_loss)), linestyle='dashed',
+             label="$\ln(\int_\Omega \|u^\\star - u_{\\hat \\theta(p, 10^" + base_10(n_e) + ", 10^" + base_10(n_r) +
+                   ", 10^" + base_10(D) + ")}\|_2^2d\\mu_X)$")
     plt.legend()
     plt.xlabel("Epoch p")
     plt.savefig(os.path.join("Outputs", "training", "perf_" + str(n) + ".pdf"), bbox_inches="tight")
@@ -42,11 +43,12 @@ def linear_reg():
 
     # Plot the data points and regression line
     plt.figure()
-    plt.scatter(log_n, log_test_loss, color="blue", label="Data points")
-    plt.plot(regression_n, regression_loss, color='red',
-             label='Linear regression: \n y = ' + str(round(m, 2)) + 'x ' + str(round(b, 2)))
+    plt.plot(log_n, log_test_loss, color="dodgerblue", linestyle='dashed',  label="Logarithm of the $L^2$ error", marker="x",
+             markersize = 15, markeredgewidth=3)
+    plt.plot(regression_n, regression_loss, color='lightsalmon',
+             label='Linear regression: \n y = ' + str(round(m, 2)) + '$\;\ln(n)\;$' + str(round(b, 2)))
     plt.xlabel('ln(n)')
-    plt.ylabel("$L^2$ error")
+    plt.ylabel("Logarithm of the $L^2$ error")
     plt.legend()
     plt.savefig(os.path.join("Outputs", "linear_regression.pdf"), bbox_inches="tight")
     return
@@ -58,9 +60,11 @@ def PI():
     log_n = results[["log(n)"]].to_numpy().reshape(-1)
 
     plt.figure()
-    plt.scatter(log_n,log_PI, color='blue', label="Physics-inconsistency")
+    plt.plot(log_n, log_PI, color="dodgerblue", linestyle='dashed',  label="ln(PI)", marker="x",
+             markersize = 15, markeredgewidth=3)
+    plt.axhline(y=-1.6, color='lightsalmon', linestyle='-', label='ln(PI($u^\star$))')
     plt.xlabel('ln(n)')
-    plt.ylabel("log(PI)")
+    plt.ylabel("ln(PI)")
     plt.legend()
     plt.savefig(os.path.join("Outputs", "log_PI.pdf"), bbox_inches="tight")
     return
