@@ -16,12 +16,12 @@ def base_10(n):
 def figure_monitoring(train_loss, test_loss, overfitting_gap_list, physics_inconsistency, n, n_e, n_r, D):
     plt.figure()
     plt.plot(np.log(np.array(train_loss)), label="$\ln(R_{10^"+base_10(n)+", 10^" + base_10(n_e) +
-                                                 ", 10^"+base_10(n_r)+"}^{(\mathrm{reg})})$")
-    plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|overfitting gap|)")
+                                                 ", 10^"+base_10(n_r) + "}^{(\mathrm{reg})})$")
+    plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|$\mathrm{OG}_{10^"+base_10(n)+", 10^" +
+                                                                   base_10(n_e) + ", 10^"+base_10(n_r)+"}$|)")
     plt.plot(np.log(np.array(physics_inconsistency)), label="ln(PI)")
     plt.plot(np.log(np.array(test_loss)), linestyle='dashed',
-             label="$\ln(\int_\Omega \|u^\\star - u_{\\hat \\theta(p, 10^" + base_10(n_e) + ", 10^" + base_10(n_r) +
-                   ", 10^" + base_10(D) + ")}\|_2^2d\\mu_X)$")
+             label="$\ln(\mathrm{err})(10^{"+base_10(n)+"})$")
     plt.legend()
     plt.xlabel("Epoch p")
     plt.savefig(os.path.join("Outputs", "training", "perf_" + str(n) + ".pdf"), bbox_inches="tight")

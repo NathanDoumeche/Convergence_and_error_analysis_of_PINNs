@@ -37,7 +37,8 @@ def simulation(n, n_e, n_r, n_val, D, weight_decay_exponent):
 
     # Learning and validation dataset: 0 < t,x < 1
     train_data, train_Xe, train_Xr = point_sampling(u_star, initial_condition, boundary_condition, n, n_e, n_r, noise)
-    val_data, val_Xe, val_Xr = point_sampling(u_star, initial_condition, boundary_condition, n=n_val, n_e=n_val, n_r=n_val, noise=0)
+    val_data, val_Xe, val_Xr = point_sampling(u_star, initial_condition, boundary_condition, n=n_val, n_e=n_val,
+                                              n_r=n_val, noise=0)
 
     # Create data loaders
     train_loader_r = DataLoader(train_Xr, batch_size=n_r//batch_number)

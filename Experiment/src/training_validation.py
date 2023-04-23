@@ -7,8 +7,7 @@ def point_sampling(u_star, initial_condition, boundary_condition, n, n_e, n_r, n
     train_t = (torch.rand(n, 1) / 2).reshape(-1, 1)
     train_x = torch.rand(n, 1).reshape(-1, 1)
     train_X = torch.concat((train_t, train_x), dim=1)
-    train_y = (u_star(train_X)).reshape(-1, 1) + \
-              noise * torch.normal(mean=torch.zeros(n)).reshape(-1, 1)
+    train_y = (u_star(train_X)).reshape(-1, 1) + noise * torch.normal(mean=torch.zeros(n)).reshape(-1, 1)
     train_data = torch.cat((train_X, train_y), dim=1)
 
     #Intial / Boundary conditions point sampling
@@ -26,7 +25,8 @@ def point_sampling(u_star, initial_condition, boundary_condition, n, n_e, n_r, n
     return train_data, train_Xe, train_Xr
 
 
-def train(train_loader_r, train_loader_e, train_loader_data, val_r, val_e, val_data, model, loss_fn, optimizer, lambda_t, lambda_d):
+def train(train_loader_r, train_loader_e, train_loader_data, val_r, val_e, val_data, model, loss_fn, optimizer,
+          lambda_t, lambda_d):
     #Training
     batch_number = len(train_loader_r)
 
@@ -61,7 +61,6 @@ def train(train_loader_r, train_loader_e, train_loader_data, val_r, val_e, val_d
     val_Xe, val_h = val_e[:, 0:2].reshape(-1, 2), val_e[:, 2].reshape(-1, 1)
     loss = loss_fn(model, x_r=val_r, x_e=val_Xe, h=val_h, x=torch.empty(0), y=torch.empty(0))
     loss_val_tot.append((loss[1] + loss[2] + lambda_t * loss[3]).item())
-
     overfitting_gap = empirical_PI_mean - np.mean(np.array(loss_val_tot))
     physics_inconsistency = np.mean(np.array((loss[1] + loss[2]).item()))
 
