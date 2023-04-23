@@ -49,8 +49,12 @@ if __name__ == "__main__":
     t = np.linspace(t_min, t_max, n_x)
     X, T = np.meshgrid(x, t)
 
-    x0 = np.linspace(-1, 1, 50)
-    t0 = np.zeros(x0.shape)
+    x_ini = np.linspace(-1, 1, 50)
+    t_ini = np.zeros(x_ini.shape)
+    x_boundary = np.ones(50)
+    t_boundary = np.linspace(0, 1, 50)
+    x0 = np.concatenate((-x_boundary, x_ini, x_boundary))
+    t0 = np.concatenate((t_boundary, t_ini, t_boundary))
 
 
     #Overfitting network
@@ -74,7 +78,7 @@ if __name__ == "__main__":
     cmap = colors.LinearSegmentedColormap.from_list("", ["dodgerblue", "lightsalmon"])
     surf = ax.plot_surface(X, T, overfitting_nn, cmap=cmap, linewidth=0, alpha=0.6)
     z0 = initial_condition(x0)
-    plt.plot(x0, t0, z0, c='black', linestyle='--', label='Initial condition')
+    plt.plot(x0, t0, z0, c='black', linestyle='--', label='Initial and boundary conditions')
     plt.legend(fontsize=12)
     plt.xlabel("Space", fontsize=12)
     plt.ylabel("Time", fontsize=12)
@@ -87,47 +91,9 @@ if __name__ == "__main__":
     cmap = colors.LinearSegmentedColormap.from_list("", ["dodgerblue", "lightsalmon"])
     surf = ax.plot_surface(X, T, u_star, cmap=cmap, linewidth=0, alpha=0.6)
     z0 = initial_condition(x0)
-    plt.plot(x0, t0, z0, c='black', linestyle='--', label='Initial condition')
+    plt.plot(x0, t0, z0, c='black', linestyle='--', label='Initial and boundary conditions')
     plt.legend(fontsize=12)
     plt.xlabel("Space", fontsize=12)
     plt.ylabel("Time", fontsize=12)
     ax.view_init(20, -20)
     plt.savefig(os.path.join("Outputs", "prop3-2.pdf"), bbox_inches="tight")
-
-if __name__ != "__main__":
-
-    # Samples
-    np.random.seed(1)
-    x = np.linspace(-1, 1, 20)
-    t = np.linspace(0, 1, 20)
-    X, T = np.meshgrid(x, t)
-
-    # Samples for initial condition
-    x0 = np.linspace(-1, 1, 50)
-    t0 = np.zeros(x0.shape)
-    # X0,T0 = np.meshgrid(np.linspace(-1,1,50),0)
-
-    p = 100
-    Z = np.tanh(X + .5 + p * T) - np.tanh(X - .5 + p * T) + np.tanh(.5 + p * T) - np.tanh(1.5 + p * T)
-
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    ax.tick_params(axis='both', which='major', labelsize=11)
-    cmap = colors.LinearSegmentedColormap.from_list("", ["dodgerblue", "lightsalmon"])
-
-    # Plot the surface
-    surf = ax.plot_surface(X, T, Z, cmap=cmap,
-                           linewidth=0, alpha=0.6)  # antialiased=False #cm.RdBu
-    fig.colorbar(surf, ax=ax, location = 'left')
-
-    # Plot the initial condition
-    z0 = np.tanh(x0 + .5) - np.tanh(x0 - .5) + np.tanh(.5) - np.tanh(1.5)
-    plt.plot(x0, t0, z0,
-             c='black', linestyle='--',
-             label='Initial condition')
-    plt.legend(fontsize=12)
-    plt.xlabel("Space", fontsize=12)
-    plt.ylabel("Time", fontsize=12)
-    ax.view_init(20, -20)
-    plt.savefig(os.path.join("Outputs", "prop3-2.pdf"), bbox_inches="tight")
-
-

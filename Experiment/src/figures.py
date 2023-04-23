@@ -43,12 +43,12 @@ def linear_reg():
 
     # Plot the data points and regression line
     plt.figure()
-    plt.plot(log_n, log_test_loss, color="dodgerblue", linestyle='dashed',  label="Logarithm of the $L^2$ error", marker="x",
+    plt.plot(log_n, log_test_loss, color="dodgerblue", linestyle='dashed',  label="ln(err)(n)", marker="x",
              markersize = 15, markeredgewidth=3)
     plt.plot(regression_n, regression_loss, color='lightsalmon',
-             label='Linear regression: \n y = ' + str(round(m, 2)) + '$\;\ln(n)\;$' + str(round(b, 2)))
+             label='Linear regression: \n ln(err)(n) = ' + str(round(m, 2)) + '$\;\ln(n)\;$' + str(round(b, 2)))
     plt.xlabel('ln(n)')
-    plt.ylabel("Logarithm of the $L^2$ error")
+    plt.ylabel("ln(err)(n)")
     plt.legend()
     plt.savefig(os.path.join("Outputs", "linear_regression.pdf"), bbox_inches="tight")
     return
@@ -75,7 +75,7 @@ def figure_nn(u_star, D, n):
     model.load_state_dict(torch.load(os.path.join("Outputs", "NN_weights", "model_"+str(n)+".pt")))
     model.eval()
 
-    steps = 100
+    steps = 51
     t = torch.linspace(0, 1, steps)
     x = torch.linspace(0, 1, steps)
     t_mesh, x_mesh = torch.meshgrid(x, t)
@@ -84,47 +84,47 @@ def figure_nn(u_star, D, n):
     tx = torch.concat((t_mesh_reshape, x_mesh_reshape), dim=1)
     pred = model(tx).reshape(-1, steps).detach()
 
+
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    ax.tick_params(axis='both', which='major', labelsize=11)
+
+    #Plot the neural network
+    ax.tick_params(axis='both', which='major', labelsize=12)
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["dodgerblue", "lightsalmon"])
-
-    # Plot the surface
-    surf = ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), pred.numpy(), cmap=cmap, linewidth=0, alpha=0.6)
-    fig.colorbar(surf, ax=ax, location='left')
-
-    plt.legend(fontsize=12)
-    plt.xlabel("Space", fontsize=12)
-    plt.ylabel("Time", fontsize=12)
-    ax.view_init(20, -20)
+    ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), pred.numpy(), cmap=cmap, linewidth=0, alpha=0.6)
+    plt.plot(x_mesh[0].numpy(), t_mesh[0].numpy(), pred[0].numpy(), c='black', linestyle='--', label='t = 0')
+    plt.plot(x_mesh[25].numpy(), t_mesh[25].numpy(), pred[25].numpy(), c='black', label='t = 0.5')
+    plt.legend()
+    plt.xlabel("Space")
+    plt.ylabel("$\;\;$Time")
+    ax.view_init(15, 320)
+    ax.axes.set_zlim3d(bottom=0.5, top=2.5)
     plt.savefig(os.path.join("Outputs", "hybrid_modeling_nn_"+str(n)+".pdf"), bbox_inches="tight")
 
     #Plot u_star
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    ax.tick_params(axis='both', which='major', labelsize=11)
-
-    # Plot the surface
-    surf = ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), u_star(tx).reshape(-1, steps).detach().numpy(), cmap=cmap, linewidth=0, alpha=0.6)
-    fig.colorbar(surf, ax=ax, location='left')
-
-    plt.legend(fontsize=12)
-    plt.xlabel("Space", fontsize=12)
-    plt.ylabel("Time", fontsize=12)
-    ax.view_init(20, -20)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), u_star(tx).reshape(-1, steps).detach().numpy(), cmap=cmap, linewidth=0, alpha=0.6)
+    plt.plot(x_mesh[0].numpy(), t_mesh[0].numpy(), u_star(tx).reshape(-1, steps).detach()[0].numpy(), c='black', linestyle='--', label='t = 0')
+    plt.plot(x_mesh[25].numpy(), t_mesh[25].numpy(), u_star(tx).reshape(-1, steps).detach()[25].numpy(), c='black', label='t = 0.5')
+    plt.legend()
+    plt.xlabel("Space")
+    plt.ylabel("$\;\;$Time")
+    ax.view_init(15, 320)
+    ax.axes.set_zlim3d(bottom=0.5, top=2.5)
     plt.savefig(os.path.join("Outputs", "u_star.pdf"), bbox_inches="tight")
 
     #Plot the model
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    ax.tick_params(axis='both', which='major', labelsize=11)
+    ax.tick_params(axis='both', which='major', labelsize=12)
     initial_model = torch.exp(tx[:, 0] - tx[:, 1]).reshape(-1, steps).detach()
-
-    # Plot the surface
-    surf = ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), initial_model.numpy(), cmap=cmap, linewidth=0, alpha=0.6)
-    fig.colorbar(surf, ax=ax, location='left')
-
-    plt.legend(fontsize=12)
-    plt.xlabel("Space", fontsize=12)
-    plt.ylabel("Time", fontsize=12)
-    ax.view_init(20, -20)
+    ax.plot_surface(x_mesh.numpy(), t_mesh.numpy(), initial_model.numpy(), cmap=cmap, linewidth=0, alpha=0.6)
+    plt.plot(x_mesh[0].numpy(), t_mesh[0].numpy(), initial_model[0].numpy(), c='black', linestyle='--', label='t = 0')
+    plt.plot(x_mesh[25].numpy(), t_mesh[25].numpy(), initial_model[25].numpy(), c='black', label='t = 0.5')
+    plt.legend()
+    plt.xlabel("Space")
+    plt.ylabel("$\;\;$Time")
+    ax.view_init(15, 320)
+    ax.axes.set_zlim3d(bottom=0.5, top=2.5)
     plt.savefig(os.path.join("Outputs", "model.pdf"), bbox_inches="tight")
     return
 
