@@ -17,9 +17,9 @@ def figure_monitoring(train_loss, test_loss, overfitting_gap_list, physics_incon
     plt.figure()
     plt.plot(np.log(np.array(train_loss)), label="$\ln(R_{10^"+base_10(n)+", 10^" + base_10(n_e) +
                                                  ", 10^"+base_10(n_r) + "}^{(\mathrm{reg})})$")
-    plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln(|$\mathrm{OG}_{10^"+base_10(n)+", 10^" +
-                                                                   base_10(n_e) + ", 10^"+base_10(n_r)+"}$|)")
-    plt.plot(np.log(np.array(physics_inconsistency)), label="ln(PI)")
+    plt.plot(np.log(np.array(np.abs(overfitting_gap_list))), label="ln($\mathrm{OG}_{10^"+base_10(n)+", 10^" +
+                                                                   base_10(n_e) + ", 10^"+base_10(n_r)+"}$)")
+    plt.plot(np.log(np.array(physics_inconsistency)), label="ln(PI)($10^"+base_10(n)+"$)")
     plt.plot(np.log(np.array(test_loss)), linestyle='dashed',
              label="$\ln(\mathrm{err})(10^{"+base_10(n)+"})$")
     plt.legend()
@@ -62,7 +62,7 @@ def PI():
     plt.figure()
     plt.plot(log_n, log_PI, color="dodgerblue", linestyle='dashed',  label="ln(PI)", marker="x",
              markersize = 15, markeredgewidth=3)
-    plt.axhline(y=-1.6, color='lightsalmon', linestyle='-', label='ln(PI($u^\star$))')
+    plt.axhline(y=-1.6, color='lightsalmon', linestyle='dashed', label='ln(PI($u^\star$))', linewidth=3)
     plt.xlabel('ln(n)')
     plt.ylabel("ln(PI)")
     plt.legend()
