@@ -57,4 +57,4 @@ if __name__ == "__main__":
             label="$u^{\\star}$",
             linestyle='dashed')
     ax.legend(fontsize=18)
-    plt.savefig(os.path.join("Outputs", "prop3-1.pdf"), bbox_inches="tight")
+    plt.savefig(os.path.join("Outputs", "fig_1.pdf"), bbox_inches="tight")

@@ -96,4 +96,4 @@ if __name__ == "__main__":
     plt.xlabel("Space", fontsize=12)
     plt.ylabel("Time", fontsize=12)
     ax.view_init(20, -20)
-    plt.savefig(os.path.join("Outputs", "prop3-2.pdf"), bbox_inches="tight")
+    plt.savefig(os.path.join("Outputs", "fig_2.pdf"), bbox_inches="tight")
