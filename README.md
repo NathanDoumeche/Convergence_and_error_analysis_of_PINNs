@@ -1,5 +1,5 @@
-# Convergence and error analysis of PINNs
-This project aims at illustrating the results of the paper _Convergence and error analysis of PINNs_ 
+# On the convergence of PINNs
+This project aims at illustrating the results of the paper _On the convergence of PINNs_ 
 (Nathan Doumèche, Gérard Biau, and Claire Boyer). In particular, the Sobolev regularization of a Physics-informed neural network 
 is implemented in Pytorch in the file _Section_5/src/regularized_neural_network.py_.
 
